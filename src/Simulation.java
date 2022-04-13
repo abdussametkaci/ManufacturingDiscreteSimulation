@@ -16,7 +16,6 @@ public class Simulation {
     private double faultPercent = 0.1;
     private int totalQueueLength = 0;
     private int maxQueueLength = 0;
-    private Event lastEvent;
     private Queue<Event> fel = new PriorityQueue<>();
 
     public void run() {
@@ -33,7 +32,7 @@ public class Simulation {
         int serviceTime = getServiceTime(minReviewTime, maxReviewTime);
         Event e = new Event(count++, clock + arrivalTime, clock + arrivalTime, clock + arrivalTime + clock + serviceTime, EventType.ARRIVAL);
         fel.add(e);
-        lastEvent = e;
+        
         System.out.println("------------------------------");
         System.out.println("t = " + clock);
         System.out.println("System initialized");
@@ -68,24 +67,19 @@ public class Simulation {
                 if (isInspectorBusy()) {
                     Event e = new Event(event.id, event.arrivalTime, event.startTime, event.endTime, EventType.IN_QUEUE);
                     fel.add(e);
-                    lastEvent = e;
                     System.out.println("Part " + event.id + " goes into queue");
                 } else {
                     System.out.println("Inspection starts");
                     Event e = new Event(event.id, event.arrivalTime, event.startTime, event.endTime, EventType.LEAVING);
                     fel.add(e);
-                    lastEvent = e;
                     System.out.println("Part " + event.id + " scheduled to leave system at t = " + event.endTime);
                 }
                 System.out.println("Queue length = " + queueLength());
                 break;
             case IN_QUEUE:
-                if(!isInspectorBusy()) {
-                    Event e = new Event(event.id, event.arrivalTime, event.startTime, event.endTime, EventType.LEAVING);
-                    fel.add(e);
-                    lastEvent = e;
-                    System.out.println("Part " + event.id + " scheduled to leave system at t = " + event.endTime);
-                }
+                Event e = new Event(event.id, event.arrivalTime, event.startTime, event.endTime, EventType.LEAVING);
+                fel.add(e);
+                System.out.println("Part " + event.id + " scheduled to leave system at t = " + event.endTime);
                 break;
             case LEAVING:
                 System.out.println("Inspection completed");
@@ -110,10 +104,9 @@ public class Simulation {
 
         if (preClock != clock && clock % 5 == 0) {
             int at = clock + arrivalTime;
-            int startTime = Math.max(lastEvent.endTime, at);
+            int startTime = Math.max(getLastEndTime(), at);
             Event e = new Event(count++, at, startTime, startTime + serviceTime, EventType.ARRIVAL);
             fel.add(e);
-            lastEvent = e;
             System.out.println("New arrival (Part " + e.id + ") generated and scheduled for t = " + e.arrivalTime);
         }
         if (event.eventType == EventType.ARRIVAL) {
@@ -160,5 +153,13 @@ public class Simulation {
             if (e.eventType == EventType.LEAVING) return true;
         }
         return false;
+    }
+
+    private int getLastEndTime() {
+        Event event = fel.peek();
+        for (Event e : fel) {
+            if (e.id > event.id) event = e;
+        }
+        return event.endTime;
     }
 }
