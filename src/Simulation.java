@@ -118,9 +118,9 @@ public class Simulation {
     private void report() {
         System.out.println("------------------------------");
         System.out.println("### Report ###");
+        printFEL();
         System.out.println("Total simulation time = " + clock);
         System.out.println("Length of FEL = " + fel.size());
-        printFEL();
         System.out.println("Average length of queue = " + ((double) totalQueueLength / count));
         System.out.println("Maximum length of queue = " + maxQueueLength);
     }
