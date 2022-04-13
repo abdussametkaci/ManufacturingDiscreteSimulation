@@ -30,7 +30,7 @@ public class Simulation {
     private void initialize() {
         clock = 0;
         int serviceTime = getServiceTime(minReviewTime, maxReviewTime);
-        Event e = new Event(count++, clock + arrivalTime, clock + arrivalTime, clock + arrivalTime + clock + serviceTime, EventType.ARRIVAL);
+        Event e = new Event(count++, clock + arrivalTime, clock + arrivalTime, clock + arrivalTime + serviceTime, EventType.ARRIVAL);
         fel.add(e);
         
         System.out.println("------------------------------");
