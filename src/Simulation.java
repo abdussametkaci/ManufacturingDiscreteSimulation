@@ -16,7 +16,9 @@ public class Simulation {
     private double faultPercent = 0.1;
     private int totalQueueLength = 0;
     private int maxQueueLength = 0;
-    private Queue<Event> fel = new PriorityQueue<>();
+
+    private Event lastEventById = null;
+    private final Queue<Event> fel = new PriorityQueue<>();
 
     public void run() {
         initialize();
@@ -32,6 +34,8 @@ public class Simulation {
         int serviceTime = getServiceTime(minReviewTime, maxReviewTime);
         Event e = new Event(count++, clock + arrivalTime, clock + arrivalTime, clock + arrivalTime + serviceTime, EventType.ARRIVAL);
         fel.add(e);
+
+        lastEventById = e;
         
         System.out.println("------------------------------");
         System.out.println("t = " + clock);
@@ -104,9 +108,12 @@ public class Simulation {
 
         if (preClock != clock && clock % 5 == 0) {
             int at = clock + arrivalTime;
-            int startTime = Math.max(getLastEndTime(), at);
+            int startTime = Math.max(lastEventById.endTime, at);
             Event e = new Event(count++, at, startTime, startTime + serviceTime, EventType.ARRIVAL);
             fel.add(e);
+
+            lastEventById = e;
+
             System.out.println("New arrival (Part " + e.id + ") generated and scheduled for t = " + e.arrivalTime);
         }
         if (event.eventType == EventType.ARRIVAL) {
@@ -153,13 +160,5 @@ public class Simulation {
             if (e.eventType == EventType.LEAVING) return true;
         }
         return false;
-    }
-
-    private int getLastEndTime() {
-        Event event = fel.peek();
-        for (Event e : fel) {
-            if (e.id > event.id) event = e;
-        }
-        return event.endTime;
     }
 }
